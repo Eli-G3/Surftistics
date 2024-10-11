@@ -9,13 +9,18 @@ class SurftisticsMenuDelegate extends WatchUi.MenuInputDelegate {
     }
 
     function onMenuItem(item as Symbol) as Void {
-        if (item == :item_1) {
-            System.println("item 1");
+        if (item == :caught) {
+            System.println("caught");
             var a = new SurftisticsSensorPrinter();
             System.println("A: " + a.toString());
-        } else if (item == :item_2) {
-            System.println("item 2");
+        } else if (item == :missed) {
+            System.println("missed");
+        } else if (item == :paddling) {
+            System.println("paddiling");
+        } else {
+            System.error("Invalid Selection!");
         }
+        WatchUi.pushView(new SurftisticsView(), new SurftisticsDelegate(), WatchUi.SLIDE_BLINK);
     }
 
 }

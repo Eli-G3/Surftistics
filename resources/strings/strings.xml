@@ -1,8 +1,13 @@
 <strings>
     <string id="AppName">Surftistics</string>
 
-    <string id="prompt">Click to start sensor</string>
+    <string id="Title">Surftistics</string>
+    <string id="prompt">Push SELECT to start</string>
 
-    <string id="menu_label_1">Item 1</string>
-    <string id="menu_label_2">Item 2</string>
+    <string id="monitoring_title">Monitoring</string>
+    <string id="monitoring_prompt">Push SELECT to stop</string>
+
+    <string id="menu_label_1">Caught</string>
+    <string id="menu_label_2">Missed</string>
+    <string id="menu_label_3">Paddling</string>
 </strings>

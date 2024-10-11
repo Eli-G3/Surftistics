@@ -1,12 +1,42 @@
-<layout id="MainLayout">
-    <label x="50%" font="Graphics.FONT_SMALL" y="50%" text="@Strings.prompt" color="Graphics.COLOR_WHITE" justification="Graphics.TEXT_JUSTIFY_CENTER" />
-    <bitmap id="id_monkey" x="center" y="80" filename="../drawables/monkey.png" />
-    <button x="50%" y="80%" width="50" height="50">
-        <state id="stateDefault" color="Graphics.COLOR_BLUE"/>
-        <state id="stateHighlighted" color="Graphics.COLOR_GREEN"/>
-        <state id="stateSelected" color="Graphics.COLOR_GREEN" />
-        <state id="stateDisabled" color="Graphics.COLOR_BLACK" />
-        <param name="background">Graphics.COLOR_BLACK</param>
-        <param name="behavior">onMenu</param>
-    </button>
-</layout>
+<layouts>
+    <layout id="MonitoringLayout">
+        <label
+                id="m_title"
+                x="center"
+                font="Graphics.FONT_MEDIUM"
+                y="20%"
+                text="@Strings.monitoring_title"
+                color="Graphics.COLOR_GREEN"
+                justification="Graphics.TEXT_JUSTIFY_CENTER"
+        />
+        <label
+                id="m_prompt"
+                x="center"
+                font="Graphics.FONT_SMALL"
+                y="60%"
+                text="@Strings.monitoring_prompt"
+                color="Graphics.COLOR_WHITE"
+                justification="Graphics.TEXT_JUSTIFY_CENTER"
+        />
+    </layout>
+    <layout id="MainLayout">
+        <label
+                id="Title"
+                x="center"
+                font="Graphics.FONT_MEDIUM"
+                y="20%"
+                text="@Strings.Title"
+                color="Graphics.COLOR_WHITE"
+                justification="Graphics.TEXT_JUSTIFY_CENTER"
+        />
+        <label
+                id="prompt"
+                x="center"
+                font="Graphics.FONT_SMALL"
+                y="60%"
+                text="@Strings.prompt"
+                color="Graphics.COLOR_WHITE"
+                justification="Graphics.TEXT_JUSTIFY_CENTER"
+        />
+    </layout>
+</layouts>

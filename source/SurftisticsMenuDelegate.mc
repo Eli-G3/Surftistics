@@ -11,8 +11,6 @@ class SurftisticsMenuDelegate extends WatchUi.MenuInputDelegate {
     function onMenuItem(item as Symbol) as Void {
         if (item == :caught) {
             System.println("caught");
-            var a = new SurftisticsSensorPrinter();
-            System.println("A: " + a.toString());
         } else if (item == :missed) {
             System.println("missed");
         } else if (item == :paddling) {

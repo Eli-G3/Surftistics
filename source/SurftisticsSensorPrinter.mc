@@ -30,6 +30,7 @@ class SurftisticsSensor {
     private var _records_array = new Array<Float>[RECORDS_SIZE];
     private var _current_idx = 0;
     private var _record_insertions = 0;
+    private var _needs_storing = false;
 
     function initialize() {
         Sensor.setEnabledSensors( [Sensor.SENSOR_HEARTRATE, Sensor.SENSOR_TEMPERATURE] );
@@ -55,12 +56,16 @@ class SurftisticsSensor {
         }
         catch (e instanceof Lang.Exception) {
             System.println(e.getErrorMessage());
+            // Todo: Maybe after error save what you have if there is what to save.
+            return;
         }
 
         self._record_insertions++;
+        self._needs_storing = true;
         if (self._record_insertions >= RECORDS_COUNT) {
             self._store_records();
             self._record_insertions = 0;
+            self._needs_storing = false;
         }
     }
 
@@ -69,7 +74,8 @@ class SurftisticsSensor {
         var key_name = "counter_" + self._record_insertions.toString();
         Application.Storage.setValue(key_name, self._records_array);
         self._current_idx = 0;
-        // Todo: Add array deleting functionality
+        // Re-initialize the array with null values. The old array will be freed because it's ref-count drops to 0.
+        self._records_array = new Array<Float>[RECORDS_SIZE];
     }
 
     function _insert_record(record_idx as Number, record_value as Float) as Void {
@@ -77,7 +83,7 @@ class SurftisticsSensor {
             throw new Lang.ValueOutOfBoundsException("Index should be no more than " + RecordIndexes.NUM_OF_INDEXES + " but was " + record_idx);
         }
         if (!(record_value instanceof Number) && !(record_value instanceof Float)) {
-            throw new Lang.InvalidValueException(record_value.toString() + " should be float or int");
+            throw new Lang.InvalidValueException(record_value + " should be float or int");
         }
         // Insert the value into the record
         self._records_array[self._current_idx + record_idx] = record_value;
@@ -121,8 +127,11 @@ class SurftisticsSensor {
 
     function stop() as Void {
         self._sampling_timer.stop();
-        // Todo: Add global flag mechanism to see if storage is neccessary
-        self._store_records();
+        System.println("needs storing: " + self._needs_storing);
+        if (self._needs_storing) {
+            self._store_records();
+            self._needs_storing = false;
+        }
     }
 
 }

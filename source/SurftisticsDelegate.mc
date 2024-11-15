@@ -19,15 +19,11 @@ class SurftisticsDelegate extends WatchUi.BehaviorDelegate {
 class SurftisticsMonitoringDelegate extends WatchUi.BehaviorDelegate {
 
     private var _surftistics_sensor;
-    private var _is_sensor_initialized = false;
 
     function initialize() {
         BehaviorDelegate.initialize();
         System.println("inited");
-        if (!_is_sensor_initialized) {
-            _surftistics_sensor = new SurftisticsSensor();
-            _is_sensor_initialized = true;
-        }
+        _surftistics_sensor = new SurftisticsSensor();
         _surftistics_sensor.monitor();
     }
 

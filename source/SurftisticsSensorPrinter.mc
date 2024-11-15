@@ -29,7 +29,7 @@ class SurftisticsSensor {
     private var _sampling_timer;
     private var _records_array = new Array<Float>[RECORDS_SIZE];
     private var _current_idx = 0;
-    private var _sensor_calls = 0;
+    private var _record_insertions = 0;
 
     function initialize() {
         Sensor.setEnabledSensors( [Sensor.SENSOR_HEARTRATE, Sensor.SENSOR_TEMPERATURE] );
@@ -38,8 +38,6 @@ class SurftisticsSensor {
     }
 
     function onSensor() as Void {
-        self._sensor_calls++;
-
         var sensorInfo = Sensor.getInfo();
         System.println( "Heart Rate: " + sensorInfo.heartRate );
         System.println( "Accel : " + sensorInfo.accel);
@@ -52,52 +50,42 @@ class SurftisticsSensor {
         System.println( "pressure: " + sensorInfo.pressure);
         System.println( "speed: " + sensorInfo.speed);
         System.println( "temp: " + sensorInfo.temperature);
-        self._add_records(sensorInfo);
+        try {
+            self._add_records(sensorInfo);
+        }
+        catch (e instanceof Lang.Exception) {
+            System.println(e.getErrorMessage());
+        }
 
-        if (self._sensor_calls >= RECORDS_COUNT) {
+        self._record_insertions++;
+        if (self._record_insertions >= RECORDS_COUNT) {
             self._store_records();
-            self._sensor_calls = 0;
+            self._record_insertions = 0;
         }
     }
 
     function _store_records() as Void {
-        var key_name = "counter_" + self._sensor_calls.toString();
+        // Todo: Add storage name changer to catagorize values into result (Caught, missed, padding, etc...)
+        var key_name = "counter_" + self._record_insertions.toString();
         Application.Storage.setValue(key_name, self._records_array);
         self._current_idx = 0;
-        // Add array deleting functionality
+        // Todo: Add array deleting functionality
     }
 
     function _insert_record(record_idx as Number, record_value as Float) as Void {
         if (record_idx >= RecordIndexes.NUM_OF_INDEXES) {
-            // Todo: return error value
-            System.println("too big");
-            System.println("idx " + record_idx);
-            return;
+            throw new Lang.ValueOutOfBoundsException("Index should be no more than " + RecordIndexes.NUM_OF_INDEXES + " but was " + record_idx);
         }
-        if (!(record_value instanceof Number) || !(record_value instanceof Float)) {
-            // Todo: return error value
-            System.println("record_value: " + record_value);
-            return;
+        if (!(record_value instanceof Number) && !(record_value instanceof Float)) {
+            throw new Lang.InvalidValueException(record_value.toString() + " should be float or int");
         }
-
         // Insert the value into the record
         self._records_array[self._current_idx + record_idx] = record_value;
-
-        // Point to next record
-        if (self._current_idx < RECORDS_COUNT) {
-            self._current_idx += RecordIndexes.NUM_OF_INDEXES;
-            System.println("Record index " + self._current_idx);
-        } else {
-            self._current_idx = 0;
-            System.println("Record Array Cycled!");
-        }
     }
 
     function _add_records(sensorInfo) as Void {
         if (sensorInfo == null || self._records_array == null) {
-            // Todo: return error value
-            System.println("Given Null");
-            return;
+            throw new Lang.InvalidValueException("Bad params: SensorInfo: " + sensorInfo + ", Records: " + self._records_array);
         }
         self._insert_record(RecordIndexes.HEART_RATE, sensorInfo.heartRate);
         self._insert_record(RecordIndexes.ALTITUDE, sensorInfo.altitude);
@@ -116,6 +104,15 @@ class SurftisticsSensor {
             self._insert_record(RecordIndexes.MAG_Y, sensorInfo.mag[1]);
             self._insert_record(RecordIndexes.MAG_Z, sensorInfo.mag[2]);
         }
+
+        // Point to next record
+        if (self._current_idx < RECORDS_COUNT) {
+            self._current_idx += RecordIndexes.NUM_OF_INDEXES;
+            System.println("Record index " + self._current_idx);
+        } else {
+            self._current_idx = 0;
+            System.println("Record Array Cycled!");
+        }
     }
 
     function monitor() as Void {
@@ -124,6 +121,7 @@ class SurftisticsSensor {
 
     function stop() as Void {
         self._sampling_timer.stop();
+        // Todo: Add global flag mechanism to see if storage is neccessary
         self._store_records();
     }
 

@@ -30,8 +30,10 @@ class SurftisticsMonitoringDelegate extends WatchUi.BehaviorDelegate {
     function onKeyPressed(keyEvent) as Boolean {
         System.println(keyEvent.getType());
         System.println(keyEvent.getKey());
-        WatchUi.pushView(new Rez.Menus.MainMenu(), new SurftisticsMenuDelegate(), WatchUi.SLIDE_UP);
         _surftistics_sensor.stop();
+        WatchUi.pushView(new Rez.Menus.MainMenu(),
+                        new SurftisticsMenuDelegate(_surftistics_sensor.record_names_array,
+                        RECORD_NAME_PREFIX), WatchUi.SLIDE_UP);
         return true;
     }
 

@@ -1,6 +1,8 @@
 import Toybox.Sensor;
 import Toybox.Timer;
 import Toybox.Lang;
+import Toybox.System;
+import Toybox.Time;
 
 
     module RecordIndexes {
@@ -24,6 +26,7 @@ import Toybox.Lang;
 
     const RECORDS_COUNT = 125;
     const RECORDS_SIZE = RecordIndexes.NUM_OF_INDEXES * RECORDS_COUNT;
+    const RECORD_NAME_PREFIX = "counter_"; // This must be of len >= 1
 
 class SurftisticsSensor {
     private var _sampling_timer;
@@ -31,10 +34,10 @@ class SurftisticsSensor {
     private var _current_idx = 0;
     private var _record_insertions = 0;
     private var _needs_storing = false;
+    public var record_names_array = [];
 
     function initialize() {
         Sensor.setEnabledSensors( [Sensor.SENSOR_HEARTRATE, Sensor.SENSOR_TEMPERATURE] );
-        // Sensor.enableSensorEvents( method( :onSensor ) );
         self._sampling_timer = new Timer.Timer();
     }
 
@@ -55,8 +58,10 @@ class SurftisticsSensor {
             self._add_records(sensorInfo);
         }
         catch (e instanceof Lang.Exception) {
-            System.println(e.getErrorMessage());
-            // Todo: Maybe after error save what you have if there is what to save.
+            System.println("Message: " + e.getErrorMessage());
+            if (self._needs_storing) {
+                self._store_records();
+            }
             return;
         }
 
@@ -64,18 +69,29 @@ class SurftisticsSensor {
         self._needs_storing = true;
         if (self._record_insertions >= RECORDS_COUNT) {
             self._store_records();
-            self._record_insertions = 0;
-            self._needs_storing = false;
         }
     }
 
     function _store_records() as Void {
-        // Todo: Add storage name changer to catagorize values into result (Caught, missed, padding, etc...)
-        var key_name = "counter_" + self._record_insertions.toString();
-        Application.Storage.setValue(key_name, self._records_array);
+        // Todo: Make suffix of key to be timestamp
+        var timestamp = self.get_timestamp_as_str();
+        var key_name = RECORD_NAME_PREFIX + timestamp;
+        System.println("ADDING RECORD: " + key_name);
+        self.record_names_array.add(key_name);
+
+        try {
+            Application.Storage.setValue(key_name, self._records_array);
+        }
+        catch (e instanceof Lang.Exception) {
+            System.println("Failed to store data - ERROR: " + e.getErrorMessage());
+        }
+
         self._current_idx = 0;
         // Re-initialize the array with null values. The old array will be freed because it's ref-count drops to 0.
         self._records_array = new Array<Float>[RECORDS_SIZE];
+        // Zero out counters
+        self._record_insertions = 0;
+        self._needs_storing = false;
     }
 
     function _insert_record(record_idx as Number, record_value as Float) as Void {
@@ -130,8 +146,21 @@ class SurftisticsSensor {
         System.println("needs storing: " + self._needs_storing);
         if (self._needs_storing) {
             self._store_records();
-            self._needs_storing = false;
         }
+    }
+
+    function get_timestamp_as_str() as String {
+        var now = Time.now();
+        var time_info = Time.Gregorian.utcInfo(now, Time.FORMAT_SHORT);
+        return Lang.format("$1$-$2$-$3$_$4$-$5$-$6$", [
+                            time_info.day.format("%02u"),
+                            time_info.month.format("%02u"),
+                            time_info.year.format("%04u"),
+                            time_info.hour.format("%02u"),
+                            time_info.min.format("%02u"),
+                            time_info.sec.format("%02u"),
+                            ]);
+
     }
 
 }

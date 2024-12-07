@@ -26,7 +26,7 @@ import Toybox.Time;
 
     const RECORDS_COUNT = 125;
     const RECORDS_SIZE = RecordIndexes.NUM_OF_INDEXES * RECORDS_COUNT;
-    const RECORD_NAME_PREFIX = "counter_"; // This must be of len >= 1
+    const RECORD_NAME_PREFIX = "record_"; // This must be of len >= 1
 
 class SurftisticsSensor {
     private var _sampling_timer;
@@ -109,6 +109,12 @@ class SurftisticsSensor {
         if (sensorInfo == null || self._records_array == null) {
             throw new Lang.InvalidValueException("Bad params: SensorInfo: " + sensorInfo + ", Records: " + self._records_array);
         }
+        // Bounds Checking
+        System.println("Record index " + self._current_idx);
+        if (self._current_idx > (RECORDS_SIZE - RecordIndexes.NUM_OF_INDEXES)) {
+            self._current_idx = 0;
+            System.println("Record Array Cycled!");
+        }
         self._insert_record(RecordIndexes.HEART_RATE, sensorInfo.heartRate);
         self._insert_record(RecordIndexes.ALTITUDE, sensorInfo.altitude);
         self._insert_record(RecordIndexes.HEADING, sensorInfo.heading);
@@ -128,13 +134,7 @@ class SurftisticsSensor {
         }
 
         // Point to next record
-        if (self._current_idx < RECORDS_COUNT) {
-            self._current_idx += RecordIndexes.NUM_OF_INDEXES;
-            System.println("Record index " + self._current_idx);
-        } else {
-            self._current_idx = 0;
-            System.println("Record Array Cycled!");
-        }
+        self._current_idx += RecordIndexes.NUM_OF_INDEXES;
     }
 
     function monitor() as Void {
